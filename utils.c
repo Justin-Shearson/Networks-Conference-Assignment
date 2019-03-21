@@ -24,7 +24,12 @@ int startserver()
 
   char *  serverhost;  /* hostname */
   ushort  serverport;  /* server port */
+  if(sd = socket(AF_INET, SOCK_STREAM, 0) < 0{
+    fprintf(stderr, "Error creating socket");
+    exit(1);
 
+  }
+  int sever_fd = bind();
   /*
     TODO:
     create a TCP socket 
