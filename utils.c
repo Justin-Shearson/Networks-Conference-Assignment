@@ -24,12 +24,16 @@ int startserver()
 
   char *  serverhost;  /* hostname */
   ushort  serverport;  /* server port */
-  if(sd = socket(AF_INET, SOCK_STREAM, 0) < 0{
+  if(sd = socket(AF_INET, SOCK_STREAM, 0) < 0){
     fprintf(stderr, "Error creating socket");
     exit(1);
 
   }
-  int sever_fd = bind();
+  int server_fd = bind(sd, (struct));
+  struct sockaddr_in server_address;
+  server_address.sin_family = AF_INET;
+  server_address.sin_port = serverport;
+  server_address.sin_addr = INADDR_ANY;
   /*
     TODO:
     create a TCP socket 
