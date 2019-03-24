@@ -24,7 +24,7 @@ int startserver()
 
   char *  serverhost;  /* hostname */
   ushort  serverport;  /* server port */
-  if(sd = socket(AF_INET, SOCK_STREAM, 0) < 0){
+  if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
     fprintf(stderr, "Error creating socket");
     exit(1);
 
