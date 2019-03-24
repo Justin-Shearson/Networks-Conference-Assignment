@@ -22,10 +22,9 @@ int main(int argc, char *argv[]){
 	}
 
 	struct sockaddr_in serv_addr;
-	ushort portno = atoi(argv[1]);
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	serv_addr.sin_port = htons(portno);
+
 	if (bind(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) == -1){
 		fprintf(stdout, "%ld\n", sizeof(serv_addr));
 		printf("Could not bind socket with Error: %s\nSocket number: %d\n", strerror(errno), sock);
@@ -35,5 +34,7 @@ int main(int argc, char *argv[]){
 	inet_ntop(AF_INET, &(serv_addr.sin_addr), str, INET_ADDRSTRLEN);
 	printf("Server Port Number: %d\nServer Address: %s\n", serv_addr.sin_port, str);
 	close(sock);
+
+	listen(sock, 5);
 	return 1;
 }
