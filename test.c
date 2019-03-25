@@ -12,10 +12,16 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define MAXNAMELEN 256
+
 
 int main(int argc, char *argv[]){
-	
+
+	// char *  serverhost;
+	char serverhost[MAXNAMELEN];
 	int sock;
+	int hostname;
+	struct hostent *host_entry;
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0){
 		fprintf(stderr, "Error creating socket");
 		exit(1);
@@ -36,5 +42,10 @@ int main(int argc, char *argv[]){
 	close(sock);
 
 	listen(sock, 5);
+	sethostname("test", MAXNAMELEN);
+	hostname = gethostname(serverhost, MAXNAMELEN);
+	host_entry = gethostbyname(serverhost);
+	printf("%s\n", host_entry->h_name);
+	printf("%s\n",serverhost);
 	return 1;
 }
