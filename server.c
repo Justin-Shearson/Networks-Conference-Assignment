@@ -12,8 +12,8 @@
 #include <time.h> 
 #include <errno.h>
 
-extern char *  recvmsg(int sd);
-extern int     sendmsg(int sd, char *msg);
+extern char *  recvdata-(int sd);
+extern int     senddata(int sd, char *msg);
 
 extern int     startserver();
 /*--------------------------------------------------------------------*/
@@ -69,7 +69,7 @@ main(int argc, char *argv[])
 	*/
 	
 	/* read the message */
-	msg = recvmsg(itsock);
+	char * msg = recvdata(itsock);
 	if (!msg) {
 	  /* disconnect from client */
 	  printf("admin: disconnect from '%s(%hu)'\n",
