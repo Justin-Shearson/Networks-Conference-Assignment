@@ -12,7 +12,7 @@
 #include <time.h> 
 #include <errno.h>
 
-extern char *  recvdata-(int sd);
+extern char *  recvdata(int sd);
 extern int     senddata(int sd, char *msg);
 
 extern int     startserver();
