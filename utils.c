@@ -20,46 +20,57 @@
 
 
 /*----------------------------------------------------------------*/
-int startserver()
-{
+int startserver() {
   int     sd;        /* socket */
-
-  char *  serverhost;  /* hostname */
+  char serverhost[MAXNAMELEN + 1];  /* hostname */
   ushort  serverport;  /* server port */
 
+  /* Structs */
+  struct sockaddr_in server_address;
+  struct hostent *host_ent;
   /*
-    Creates the socekt for the server.
+    Creates the socket for the server.
     Returns an error stating that the socket could not be
       created if sd returns -1.
   */
-  if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
+  if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     fprintf(stderr, "Error creating socket");
+    close(sd);
     exit(1);
   }
 
-  struct sockaddr_in server_address;
   server_address.sin_family = AF_INET;
   server_address.sin_port = serverport;
   server_address.sin_addr.s_addr = INADDR_ANY;
-  
-  if(bind(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1){
-    printf("Could not bind socket with Error: %s\nSocket number: %d\n", strerror(errno), sd);
-  }
-  
+
 
   /*
-    TODO:
-    bind the socket to some random port, chosen by the system 
+    Binds the server socket to a random port
+    Returns an error if the socket could not be bound.
   */
+  if(bind(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
+    printf("Could not bind socket with Error: %s\nSocket number: %d\n", strerror(errno), sd);
+    close(sd);
+    exit(1);
+  }
+  
 
   /* ready to receive connections */
   listen(sd, 5);
 
+  
   /*
     TODO:
     obtain the full local host name (serverhost)
     use gethostname() and gethostbyname()
   */
+  if(gethostname(serverhost, MAXNAMELEN) == -1) {
+    printf("Could not get host name: %s\n", strerror(errno));
+    close(sd);
+    exit(1);
+  } else {
+    host_ent = gethostbyname(serverhost);
+  }
 
   /*
     TODO:
@@ -78,8 +89,7 @@ int startserver()
 /*
   establishes connection with the server
 */
-int connecttoserver(char *serverhost, ushort serverport)
-{
+int connecttoserver(char *serverhost, ushort serverport) {
   int     sd;          /* socket */
 
   ushort  clientport;  /* port assigned to this client */
@@ -110,8 +120,7 @@ int connecttoserver(char *serverhost, ushort serverport)
 
 
 /*----------------------------------------------------------------*/
-int readn(int sd, char *buf, int n)
-{
+int readn(int sd, char *buf, int n) {
   int     toberead;
   char *  ptr;
 
@@ -133,8 +142,7 @@ int readn(int sd, char *buf, int n)
   return(1);
 }
 
-char *recvdata(int sd)
-{
+char *recvdata(int sd) {
   char *msg;
   long  len;
   
@@ -163,8 +171,7 @@ char *recvdata(int sd)
   return(msg);
 }
 
-int senddata(int sd, char *msg)
-{
+int senddata(int sd, char *msg) {
   long len;
 
   /* write lent */
