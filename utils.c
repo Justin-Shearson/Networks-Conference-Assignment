@@ -12,6 +12,8 @@
 #include <netdb.h>
 #include <time.h> 
 #include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #define MAXNAMELEN 256
 /*--------------------------------------------------------------------*/
@@ -24,20 +26,26 @@ int startserver()
 
   char *  serverhost;  /* hostname */
   ushort  serverport;  /* server port */
+
+  /*
+    Creates the socekt for the server.
+    Returns an error stating that the socket could not be
+      created if sd returns -1.
+  */
   if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
     fprintf(stderr, "Error creating socket");
     exit(1);
-
   }
-  int server_fd = bind(sd, (struct));
+
   struct sockaddr_in server_address;
   server_address.sin_family = AF_INET;
   server_address.sin_port = serverport;
-  server_address.sin_addr = INADDR_ANY;
-  /*
-    TODO:
-    create a TCP socket 
-  */
+  server_address.sin_addr.s_addr = INADDR_ANY;
+  
+  if(bind(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1){
+    printf("Could not bind socket with Error: %s\nSocket number: %d\n", strerror(errno), sd);
+  }
+  
 
   /*
     TODO:
@@ -125,7 +133,7 @@ int readn(int sd, char *buf, int n)
   return(1);
 }
 
-char *recvmsg(int sd)
+char *recvdata(int sd)
 {
   char *msg;
   long  len;
@@ -155,7 +163,7 @@ char *recvmsg(int sd)
   return(msg);
 }
 
-int sendmsg(int sd, char *msg)
+int senddata(int sd, char *msg)
 {
   long len;
 

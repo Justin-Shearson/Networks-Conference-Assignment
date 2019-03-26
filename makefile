@@ -16,3 +16,7 @@ server: server.o utils.o
 test: test.o
 	gcc -g -o test test.o
 
+#compile only utils
+utils: utils.o
+	gcc  -g -o utils utils.o
+
