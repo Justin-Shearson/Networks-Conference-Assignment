@@ -15,8 +15,8 @@
 
 #define MAXMSGLEN  1024
 
-extern char *  recvmsg(int sd);
-extern int     sendmsg(int sd, char *msg);
+extern char *  recvdata(int sd);
+extern int     senddata(int sd, char *msg);
 
 extern int     connecttoserver(char *servhost, ushort servport);
 /*--------------------------------------------------------------------*/
@@ -46,7 +46,7 @@ main(int argc, char *argv[])
 
     if (/* TODO: message from server */) {
       char *msg;
-      msg = recvmsg(sock);
+      msg = recvdata(sock);
       if (!msg) {
 	/* server died, exit */
 	fprintf(stderr, "error: server died\n");
@@ -63,7 +63,7 @@ main(int argc, char *argv[])
 
       if (!fgets(msg, MAXMSGLEN, stdin))
 	exit(0);
-      sendmsg(sock, msg);
+      senddata(sock, msg);
     }
   }
 }

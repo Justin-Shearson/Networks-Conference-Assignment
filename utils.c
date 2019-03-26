@@ -28,6 +28,7 @@ int startserver() {
   /* Structs */
   struct sockaddr_in server_address;
   struct hostent *host_ent;
+  
   /*
     Creates the socket for the server.
     Returns an error stating that the socket could not be
@@ -77,6 +78,12 @@ int startserver() {
     get the port assigned to this server (serverport)
     use getsockname()
   */
+  int addrlen = sizeof(server_address);
+  if(getsockname(sd, (struct sockaddr *) &server_address, &addrlen) == -1) {
+    printf("Error getting socket name: %s\n", strerror(errno));
+    close(sd);
+    exit(1);
+  }
 
   /* ready to accept requests */
   printf("admin: started server on '%s' at '%hu'\n",
@@ -91,13 +98,16 @@ int startserver() {
 */
 int connecttoserver(char *serverhost, ushort serverport) {
   int     sd;          /* socket */
-
   ushort  clientport;  /* port assigned to this client */
+  
+  /* Srtructures */
+  struct sockaddr_in client_address;
 
   /*
     TODO:
     create a TCP socket 
   */
+  if(sd = socket(AF_INET, ))
 
   /*
     TODO:
