@@ -36,6 +36,8 @@ main(int argc, char *argv[])
   /* get ready to receive requests */
   serversock = startserver();
   if (serversock == -1) {
+  	printf("Failed to startserver\n");
+  	close(serversock);
     exit(1);
   }
   
