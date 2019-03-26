@@ -80,7 +80,7 @@ int startserver() {
   */
   int addrlen = sizeof(server_address);
   if(getsockname(sd, (struct sockaddr *) &server_address, &addrlen) == -1) {
-    printf("Error getting socket name: %s\n", strerror(errno));
+    printf("Could not retrieve socket name: %s\n", strerror(errno));
     close(sd);
     exit(1);
   }
@@ -119,13 +119,28 @@ int connecttoserver(char *serverhost, ushort serverport) {
     connect to the server on 'serverhost' at 'serverport'
     use gethostbyname() and connect()
   */
-  host_ent = gethostbyname(serverhost);
+  if((host_ent = gethostbyname(serverhost)) == NULL) {
+    printf("Host name does not exist\n");
+    close(sd);
+    exit(1);
+  }
+
+  if(connect(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
+    printf("There was a problem connecting to the server: %s\n", strerror(errno));
+  }
+
   
   /*
     TODO:
     get the port assigned to this client
     use getsockname()
   */
+  int addrlen = sizeof(server_address);
+  if(getsockname(sd, (struct sockaddr *) &server_address, &addrlen) == -1) {
+    printf("Could not retrieve socket name %s\n", strerror(errno));
+    close(sd);
+    exit(1);
+  }
 
   /* succesful. return socket */
   printf("admin: connected to server on '%s' at '%hu' thru '%hu'\n",
