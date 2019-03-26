@@ -28,7 +28,7 @@ int startserver() {
   /* Structs */
   struct sockaddr_in server_address;
   struct hostent *host_ent;
-  
+
   /*
     Creates the socket for the server.
     Returns an error stating that the socket could not be
@@ -99,21 +99,27 @@ int startserver() {
 int connecttoserver(char *serverhost, ushort serverport) {
   int     sd;          /* socket */
   ushort  clientport;  /* port assigned to this client */
+  char serverhost[MAXNAMELEN + 1];
   
   /* Srtructures */
-  struct sockaddr_in client_address;
+  struct sockaddr_in server_address;
+  server_address.sin_port = serverport;
+  struct hostent *host_ent;
 
   /*
     TODO:
     create a TCP socket 
   */
-  if(sd = socket(AF_INET, ))
+  if(sd = socket(AF_INET, SOCK_STREAM, 0) == -1) {
+    printf("Error creating socket: %s\n", strerror(errno));
+  }
 
   /*
     TODO:
     connect to the server on 'serverhost' at 'serverport'
     use gethostbyname() and connect()
   */
+  host_ent = gethostbyname(serverhost);
   
   /*
     TODO:
