@@ -99,7 +99,6 @@ int startserver() {
 int connecttoserver(char *serverhost, ushort serverport) {
   int     sd;          /* socket */
   ushort  clientport;  /* port assigned to this client */
-  char serverhost[MAXNAMELEN + 1];
   
   /* Srtructures */
   struct sockaddr_in server_address;
