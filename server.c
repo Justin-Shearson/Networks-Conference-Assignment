@@ -11,6 +11,7 @@
 #include <netdb.h>
 #include <time.h> 
 #include <errno.h>
+#include <sys/time.h>
 
 extern char *  recvdata(int sd);
 extern int     senddata(int sd, char *msg);
@@ -20,12 +21,15 @@ extern int     startserver();
 
 /*--------------------------------------------------------------------*/
 /* main function*/
-main(int argc, char *argv[])
-{
+main(int argc, char *argv[]) {
   int    serversock;    /* server socket*/
 
   fd_set liveskset;   /* set of live client sockets */
   int    liveskmax;   /* maximum socket */
+  
+  /* Structures */
+  struct timeval timeout;
+  timeout.tv_sec = 2;
 
   /* check usage */
   if (argc != 1) {
@@ -54,7 +58,7 @@ main(int argc, char *argv[])
       TODO:
       using select() to serve both live and new clients
     */
-    select(liveskmax + 1, liveskset, null, null, null);
+    select(liveskmax + 1, liveskset, null, null, &timeout);
     
     /* process messages from clients */
     for (itsock=3; itsock <= liveskmax; itsock++) {
@@ -62,8 +66,8 @@ main(int argc, char *argv[])
       if (itsock == serversock) continue;
 
       if ( /* TODO: message from client */ ) {
-	char *  clienthost;  /* host name of the client */
-	ushort  clientport;  /* port number of the client */
+		char *  clienthost;  /* host name of the client */
+		ushort  clientport;  /* port number of the client */
 	
 	/*
 	  TODO:

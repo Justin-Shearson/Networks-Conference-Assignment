@@ -29,9 +29,9 @@ main(int argc, char *argv[])
   int err;  //Used to return errors
 
   /* Structures */
-  fd_set readfds;
-  FD_ZERO(&readfds);
-  FD_SET(0, &readfds);
+  fd_set client_fds;
+  FD_ZERO(&client_fds);
+  FD_SET(0, &client_fds);
 
   /* Timeout Value */
   struct timeval timeout;
@@ -54,9 +54,9 @@ main(int argc, char *argv[])
       TODO: 
       use select() to watch for user inputs and messages from the server
     */
-    select(sock + 1, &readfds, NULL, NULL. &timeout);
+    select(sock + 1, &client_fds, NULL, NULL. &timeout);
 
-    if (/* TODO: message from server */) {
+    if (FD_ISSET(0, &client_fds)) {
       char *msg;
       msg = recvdata(sock);
       if (!msg) {
