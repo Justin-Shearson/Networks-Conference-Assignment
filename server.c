@@ -54,6 +54,7 @@ main(int argc, char *argv[])
       TODO:
       using select() to serve both live and new clients
     */
+    select(liveskmax + 1, liveskset, null, null, null);
     
     /* process messages from clients */
     for (itsock=3; itsock <= liveskmax; itsock++) {
@@ -81,6 +82,7 @@ main(int argc, char *argv[])
 	    TODO:
 	    remove this client from 'liveskset'  
 	  */
+	  FD_CLR(itsock, &liveskset);
 
 	  close(itsock);
 	} else {
@@ -88,6 +90,7 @@ main(int argc, char *argv[])
 	    TODO:
 	    send the message to other clients
 	  */
+	  senddata(itsock, msg);
 	  
 	  /* print the message */
 	  printf("%s(%hu): %s", clienthost, clientport, msg);
