@@ -63,6 +63,9 @@ int main(int argc, char *argv[]) {
       using select() to serve both live and new clients
     */
     int err = select(liveskmax + 1, &liveskset, NULL, NULL, &timeout);
+    if(err == -1){
+    	printf("There was an error selecting the client");
+    }
     
     /* process messages from clients */
     for (itsock=3; itsock <= liveskmax; itsock++) {
@@ -80,8 +83,12 @@ int main(int argc, char *argv[]) {
 	*/
       	socklen_t addresssize = sizeof(server_address);
      	err = getpeername(serversock, (struct sockaddr *) &server_address, &addresssize);
-     	gethostbyaddr(server_address.sin_addr, addresssize, AF_INET);
-	
+     	if(err == -1){
+     		printf("There was an error getting the peername\n");
+     	}
+
+     	gethostbyaddr((char *) &server_address.sin_addr, addresssize, AF_INET);
+
 	/* read the message */
 	char * msg = recvdata(itsock);
 	if (!msg) {
