@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
   int    liveskmax;   /* maximum socket */
   
   /* Structures */
+  struct sockaddr_in server_address;
   struct timeval timeout;
   timeout.tv_sec = 2;
 
@@ -61,14 +62,14 @@ int main(int argc, char *argv[]) {
       TODO:
       using select() to serve both live and new clients
     */
-    select(liveskmax + 1, &liveskset, NULL, NULL, &timeout);
+    int err = select(liveskmax + 1, &liveskset, NULL, NULL, &timeout);
     
     /* process messages from clients */
     for (itsock=3; itsock <= liveskmax; itsock++) {
       /* skip the listen socket */
       if (itsock == serversock) continue;
 
-      if ( /* TODO: message from client */ ) {
+      if (!(err == -1)) {
 		char *  clienthost;  /* host name of the client */
 		ushort  clientport;  /* port number of the client */
 	
@@ -77,6 +78,9 @@ int main(int argc, char *argv[]) {
 	  obtain client's host name and port
 	  using getpeername() and gethostbyaddr()
 	*/
+      	socklen_t addresssize = sizeof(server_address);
+     	err = getpeername(serversock, (struct sockaddr *) &server_address, &addresssize);
+     	gethostbyaddr(server_address.sin_addr, addresssize, AF_INET);
 	
 	/* read the message */
 	char * msg = recvdata(itsock);
@@ -90,7 +94,6 @@ int main(int argc, char *argv[]) {
 	    remove this client from 'liveskset'  
 	  */
 	  FD_CLR(itsock, &liveskset);
-
 	  close(itsock);
 	} else {
 	  /*
@@ -106,14 +109,15 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if ( /* TODO: connect request from a new client */ ) {
+    if (FD_ISSET(serversock, &liveskset)) {
 
       /*
 	TODO:
 	accept a new connection request
       */
-
-      if (/* TODO: if accept is fine */) {
+    	socklen_t serversize = sizeof(server_address);
+    	err = accept(serversock, (struct sockaddr *) &server_address, &serversize);
+      if (!(err == -1)) {
 	char *  clienthost;  /* host name of the client */
 	ushort  clientport;  /* port number of the client */
 
@@ -128,6 +132,7 @@ int main(int argc, char *argv[]) {
 	  TODO:
 	  add this client to 'liveskset'
 	*/
+	FD_SET(itsock, &liveskset);
       } else {
 	perror("accept");
 	exit(0);
