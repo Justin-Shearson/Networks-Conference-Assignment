@@ -23,7 +23,7 @@ extern int     connecttoserver(char *servhost, ushort servport);
 /*--------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------*/
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   int  sock;
   int err;  //Used to return errors
@@ -54,9 +54,9 @@ main(int argc, char *argv[])
       TODO: 
       use select() to watch for user inputs and messages from the server
     */
-    select(sock + 1, &client_fds, NULL, NULL. &timeout);
+    
 
-    if (FD_ISSET(0, &client_fds)) {
+    if (!(select(sock + 1, &client_fds, NULL, NULL, &timeout) == -1)) {
       char *msg;
       msg = recvdata(sock);
       if (!msg) {
@@ -70,7 +70,7 @@ main(int argc, char *argv[])
       free(msg);
     }
 
-    if (/* TODO: input from keyboard */) {
+    if ((FD_ISSET(0, &client_fds))) {
       char      msg[MAXMSGLEN];
 
       if (!fgets(msg, MAXMSGLEN, stdin))

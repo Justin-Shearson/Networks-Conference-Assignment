@@ -20,6 +20,7 @@
 
 
 /*----------------------------------------------------------------*/
+
 int startserver() {
   int     sd;        /* socket */
   char serverhost[MAXNAMELEN + 1];  /* hostname */
@@ -28,6 +29,9 @@ int startserver() {
   /* Structs */
   struct sockaddr_in server_address;
   struct hostent *host_ent;
+
+  int opt_val = 1;
+  setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof opt_val);
 
   /*
     Creates the socket for the server.
@@ -215,4 +219,5 @@ int senddata(int sd, char *msg) {
     write(sd, msg, len);
   return(1);
 }
+
 /*----------------------------------------------------------------*/

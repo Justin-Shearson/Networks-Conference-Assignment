@@ -12,6 +12,8 @@
 #include <time.h> 
 #include <errno.h>
 #include <sys/time.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 extern char *  recvdata(int sd);
 extern int     senddata(int sd, char *msg);
@@ -21,7 +23,7 @@ extern int     startserver();
 
 /*--------------------------------------------------------------------*/
 /* main function*/
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   int    serversock;    /* server socket*/
 
   fd_set liveskset;   /* set of live client sockets */
@@ -49,7 +51,8 @@ main(int argc, char *argv[]) {
     TODO:
     init the live client set 
   */
-
+  FD_ZERO(&liveskset);
+  FD_SET(serversock, &liveskset);
   /* receive and process requests */
   while (1) {
     int    itsock;      /* loop variable */
@@ -58,7 +61,7 @@ main(int argc, char *argv[]) {
       TODO:
       using select() to serve both live and new clients
     */
-    select(liveskmax + 1, liveskset, null, null, &timeout);
+    select(liveskmax + 1, &liveskset, NULL, NULL, &timeout);
     
     /* process messages from clients */
     for (itsock=3; itsock <= liveskmax; itsock++) {
