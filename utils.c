@@ -116,7 +116,7 @@ int connecttoserver(char *serverhost, ushort serverport) {
   client_address.sin_family = AF_INET;
   client_address.sin_addr.s_addr = INADDR_ANY;
   clientport = client_address.sin_port;
-  
+
   struct hostent *host_ent;
 
   /*
@@ -132,11 +132,13 @@ int connecttoserver(char *serverhost, ushort serverport) {
     connect to the server on 'serverhost' at 'serverport'
     use gethostbyname() and connect()
   */
+ 
   if((host_ent = gethostbyname(serverhost)) == NULL) {
     printf("Host name does not exist\n");
     close(sd);
     exit(1);
   }
+  printf("%s\n", host_ent->h_name);
 
   if(connect(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
     printf("There was a problem connecting to the server: %s\n", strerror(errno));
