@@ -132,8 +132,8 @@ int connecttoserver(char *serverhost, ushort serverport) {
     connect to the server on 'serverhost' at 'serverport'
     use gethostbyname() and connect()
   */
- 
-  if((host_ent = gethostbyname(serverhost)) == NULL) {
+  host_ent = gethostbyname(serverhost);
+  if(host_ent == NULL) {
     printf("Host name does not exist\n");
     close(sd);
     exit(1);
