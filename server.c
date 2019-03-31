@@ -30,9 +30,10 @@ int main(int argc, char *argv[]) {
   int    liveskmax;   /* maximum socket */
   
   /* Structures */
-  struct sockaddr_in server_address;
+  struct sockaddr_in server_address, client_address;
+  struct in_addr clientname;
   struct timeval timeout;
-  timeout.tv_sec = 2;
+  timeout.tv_sec = 10;
 
   /* check usage */
   if (argc != 1) {
@@ -54,8 +55,10 @@ int main(int argc, char *argv[]) {
   */
   FD_ZERO(&liveskset);
   FD_SET(serversock, &liveskset);
+  FD_SET(0, &liveskset);
   /* receive and process requests */
   while (1) {
+
     int    itsock;      /* loop variable */
 
     /*
@@ -63,6 +66,8 @@ int main(int argc, char *argv[]) {
       using select() to serve both live and new clients
     */
     int err = select(liveskmax + 1, &liveskset, NULL, NULL, &timeout);
+    printf("%d\n", liveskmax);
+    sleep(10);
     if(err == -1){
     	printf("There was an error selecting the client");
     }
@@ -122,8 +127,8 @@ int main(int argc, char *argv[]) {
 	TODO:
 	accept a new connection request
       */
-    	socklen_t serversize = sizeof(server_address);
-    	err = accept(serversock, (struct sockaddr *) &server_address, &serversize);
+    	socklen_t clientsize = sizeof(client_address);
+    	err = accept(serversock, (struct sockaddr *) &client_address, &clientsize);
       if (!(err == -1)) {
 	char *  clienthost;  /* host name of the client */
 	ushort  clientport;  /* port number of the client */

@@ -42,11 +42,13 @@ int startserver() {
   if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     fprintf(stderr, "Error creating socket");
     close(sd);
-    exit(1);
+    return(-1);
   }
 
   server_address.sin_family = AF_INET;
+  printf("%hu\n", serverport);
   server_address.sin_port = serverport;
+  printf("%hu\n", serverport);
   server_address.sin_addr.s_addr = INADDR_ANY;
 
 
@@ -57,7 +59,7 @@ int startserver() {
   if(bind(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
     printf("Could not bind socket with Error: %s\nSocket number: %d\n", strerror(errno), sd);
     close(sd);
-    exit(1);
+    return(-1);
   }
   
 
@@ -73,7 +75,7 @@ int startserver() {
   if(gethostname(serverhost, MAXNAMELEN) == -1) {
     printf("Could not get host name: %s\n", strerror(errno));
     close(sd);
-    exit(1);
+    return(-1);
   } else {
     host_ent = gethostbyname(serverhost);
   }
@@ -87,7 +89,7 @@ int startserver() {
   if(getsockname(sd, (struct sockaddr *) &server_address, &addrlen) == -1) {
     printf("Could not retrieve socket name: %s\n", strerror(errno));
     close(sd);
-    exit(1);
+    return(-1);
   }
 
   /* ready to accept requests */
@@ -106,15 +108,22 @@ int connecttoserver(char *serverhost, ushort serverport) {
   ushort  clientport;  /* port assigned to this client */
   
   /* Srtructures */
-  struct sockaddr_in server_address;
+  struct sockaddr_in server_address, client_address;
+  server_address.sin_family = AF_INET;
   server_address.sin_port = serverport;
+  server_address.sin_addr.s_addr = INADDR_ANY;
+
+  client_address.sin_family = AF_INET;
+  client_address.sin_addr.s_addr = INADDR_ANY;
+  clientport = client_address.sin_port;
+  
   struct hostent *host_ent;
 
   /*
     TODO:
     create a TCP socket 
   */
-  if(sd = socket(AF_INET, SOCK_STREAM, 0) == -1) {
+  if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     printf("Error creating socket: %s\n", strerror(errno));
   }
 
