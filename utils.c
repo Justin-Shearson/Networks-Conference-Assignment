@@ -61,18 +61,13 @@ int startserver() {
   /* ready to receive connections */
   listen(sd, 5);
 
-  
-  /*
-    TODO:
-    obtain the full local host name (serverhost)
-    use gethostname() and gethostbyname()
-  */
+  /* Gets the hostname and stores it in serverhost. */
   if(gethostname(serverhost, MAXNAMELEN) == -1) {
     printf("Could not get host name: %s\n", strerror(errno));
     close(sd);
     return(-1);
   } else {
-    host_ent = gethostbyname(serverhost);
+    host_ent = gethostbyname(serverhost); //Store the server host information
   }
 
   /*
