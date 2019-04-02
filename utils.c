@@ -31,9 +31,6 @@ int startserver() {
   struct sockaddr_in server_address;
   struct hostent *host_ent;
 
-  int opt_val = 1;
-  setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof opt_val);
-
   /*
     Creates the socket for the server.
     Returns an error stating that the socket could not be
@@ -46,9 +43,7 @@ int startserver() {
   }
 
   server_address.sin_family = AF_INET;
-  printf("%hu\n", serverport);
-  server_address.sin_port = serverport;
-  printf("%hu\n", serverport);
+  serverport = server_address.sin_port;
   server_address.sin_addr.s_addr = INADDR_ANY;
 
 
@@ -107,38 +102,41 @@ int connecttoserver(char *serverhost, ushort serverport) {
   int     sd;          /* socket */
   ushort  clientport;  /* port assigned to this client */
   
-  /* Srtructures */
-  struct sockaddr_in server_address, client_address;
-  server_address.sin_family = AF_INET;
-  server_address.sin_port = serverport;
-  server_address.sin_addr.s_addr = INADDR_ANY;
-
-  client_address.sin_family = AF_INET;
-  client_address.sin_addr.s_addr = INADDR_ANY;
-  clientport = client_address.sin_port;
-
-  struct hostent *host_ent;
-
-  /*
-    TODO:
-    create a TCP socket 
-  */
+  /* Create a TCP socket for the client to use */
   if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     printf("Error creating socket: %s\n", strerror(errno));
   }
+
+  /* Srtructures */
+  struct sockaddr_in server_address, client_address;
+
+  /* Struct used to hold information of the host that the client is connecting to */
+  struct hostent *host_ent;
+  
 
   /*
     TODO:
     connect to the server on 'serverhost' at 'serverport'
     use gethostbyname() and connect()
   */
+  /* Gets the host name and stores it in the host_ent struct. */
   host_ent = gethostbyname(serverhost);
   if(host_ent == NULL) {
     printf("Host name does not exist\n");
     close(sd);
     exit(1);
   }
-  printf("%s\n", host_ent->h_name);
+
+  /* Assigning attributes for the server struct */
+  server_address.sin_family = AF_INET;
+  server_address.sin_addr.s_addr = INADDR_ANY;
+  /* Copy over the address from host_ent to s_addr in server address */
+  bcopy((char *) host_ent->h_addr, (char *) &server_address.sin_addr.s_addr, host_ent->h_length);
+  server_address.sin_port = htons(serverport);
+  /* Assigning attributes for the client struct */
+  client_address.sin_family = AF_INET;
+  client_address.sin_addr.s_addr = INADDR_ANY;
+  clientport = client_address.sin_port;
 
   if(connect(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
     printf("There was a problem connecting to the server: %s\n", strerror(errno));
@@ -223,6 +221,7 @@ int senddata(int sd, char *msg) {
   /* write lent */
   len = (msg ? strlen(msg) + 1 : 0);
   len = htonl(len);
+  
   write(sd, (char *) &len, sizeof(len));
 
   /* write message data */

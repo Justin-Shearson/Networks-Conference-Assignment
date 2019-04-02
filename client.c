@@ -30,8 +30,6 @@ int main(int argc, char *argv[])
 
   /* Structures */
   fd_set client_fds;
-  FD_ZERO(&client_fds);
-  FD_SET(0, &client_fds);
 
   /* Timeout Value */
   struct timeval timeout;
@@ -48,15 +46,15 @@ int main(int argc, char *argv[])
   if (sock == -1)
     exit(1);
 
-  while (1) {
-    
-    /*
-      TODO: 
-      use select() to watch for user inputs and messages from the server
-    */
-    
+  /* Zeroing the set and adding the client fd to the fd_set */
+  FD_ZERO(&client_fds);
+  FD_SET(sock, &client_fds);
+  FD_SET(0, &client_fds);
 
-    if (!(select(sock + 1, &client_fds, NULL, NULL, &timeout) == -1)) {
+  while (1) {
+    /* Watch for file descriptors from the server as well as other clients. */
+    err = select(sock + 1, &client_fds, NULL, NULL, &timeout);
+    if (!(err == -1)) {
       char *msg;
       msg = recvdata(sock);
       if (!msg) {
@@ -68,8 +66,10 @@ int main(int argc, char *argv[])
       /* print the message */
       printf(">>> %s", msg);
       free(msg);
+    } else {
+      printf("There was an error getting messages from the server: %s\n", strerror(errno));
     }
-
+    /* If there is a message to be sent to the server */
     if ((FD_ISSET(0, &client_fds))) {
       char      msg[MAXMSGLEN];
 
@@ -78,5 +78,6 @@ int main(int argc, char *argv[])
       senddata(sock, msg);
     }
   }
+  return 1;
 }
 /*--------------------------------------------------------------------*/

@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in server_address, client_address;
   struct in_addr clientname;
   struct timeval timeout;
-  timeout.tv_sec = 10;
+  timeout.tv_sec = 1;
 
   /* check usage */
   if (argc != 1) {
@@ -65,9 +65,9 @@ int main(int argc, char *argv[]) {
       TODO:
       using select() to serve both live and new clients
     */
-    int err = select(liveskmax + 1, &liveskset, NULL, NULL, &timeout);
+    int err = select(liveskmax + 1, &liveskset, NULL, NULL, NULL);
     printf("%d\n", liveskmax);
-    sleep(10);
+
     if(err == -1){
     	printf("There was an error selecting the client");
     }
