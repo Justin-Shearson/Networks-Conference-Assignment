@@ -1,3 +1,4 @@
+/* Justin Shearson (jrs330) */
 /*--------------------------------------------------------------------*/
 /* conference client */
 
@@ -54,7 +55,12 @@ int main(int argc, char *argv[])
   while (1) {
     /* Watch for file descriptors from the server as well as other clients. */
     err = select(sock + 1, &client_fds, NULL, NULL, &timeout);
-    if (!(err == -1)) {
+    if(err == -1){
+      printf("Error selecting file descriptor: %s\n", strerror(errno));
+    }
+    
+    /* If there is a client ready to be served */
+    if (FD_ISSET(sock, &client_fds)) {
       char *msg;
       msg = recvdata(sock);
       if (!msg) {
@@ -66,9 +72,8 @@ int main(int argc, char *argv[])
       /* print the message */
       printf(">>> %s", msg);
       free(msg);
-    } else {
-      printf("There was an error getting messages from the server: %s\n", strerror(errno));
     }
+    
     /* If there is a message to be sent to the server */
     if ((FD_ISSET(0, &client_fds))) {
       char      msg[MAXMSGLEN];

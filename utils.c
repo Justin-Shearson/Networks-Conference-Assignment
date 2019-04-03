@@ -1,3 +1,4 @@
+/* Justin Shearson (jrs330) */
 /*--------------------------------------------------------------------*/
 /* functions to connect clients and server */
 
@@ -42,6 +43,7 @@ int startserver() {
     return(-1);
   }
 
+  /* Assigning attributes to server_address */
   server_address.sin_family = AF_INET;
   serverport = server_address.sin_port;
   server_address.sin_addr.s_addr = INADDR_ANY;
@@ -70,11 +72,7 @@ int startserver() {
     host_ent = gethostbyname(serverhost); //Store the server host information
   }
 
-  /*
-    TODO:
-    get the port assigned to this server (serverport)
-    use getsockname()
-  */
+  /* Get the port assigned to the server */
   int addrlen = sizeof(server_address);
   if(getsockname(sd, (struct sockaddr *) &server_address, &addrlen) == -1) {
     printf("Could not retrieve socket name: %s\n", strerror(errno));
@@ -108,12 +106,6 @@ int connecttoserver(char *serverhost, ushort serverport) {
   /* Struct used to hold information of the host that the client is connecting to */
   struct hostent *host_ent;
   
-
-  /*
-    TODO:
-    connect to the server on 'serverhost' at 'serverport'
-    use gethostbyname() and connect()
-  */
   /* Gets the host name and stores it in the host_ent struct. */
   host_ent = gethostbyname(serverhost);
   if(host_ent == NULL) {
@@ -125,30 +117,34 @@ int connecttoserver(char *serverhost, ushort serverport) {
   /* Assigning attributes for the server struct */
   server_address.sin_family = AF_INET;
   server_address.sin_addr.s_addr = INADDR_ANY;
+
   /* Copy over the address from host_ent to s_addr in server address */
   bcopy((char *) host_ent->h_addr, (char *) &server_address.sin_addr.s_addr, host_ent->h_length);
+  
+  /* Store the server port number */
   server_address.sin_port = htons(serverport);
+
   /* Assigning attributes for the client struct */
   client_address.sin_family = AF_INET;
   client_address.sin_addr.s_addr = INADDR_ANY;
   clientport = client_address.sin_port;
 
+  /* Connect to the server */
   if(connect(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
     printf("There was a problem connecting to the server: %s\n", strerror(errno));
+    return -1;
   }
 
-  
-  /*
-    TODO:
-    get the port assigned to this client
-    use getsockname()
-  */
+  /* Get the port number that was assigned to the client */
   int addrlen = sizeof(server_address);
-  if(getsockname(sd, (struct sockaddr *) &server_address, &addrlen) == -1) {
+  if(getsockname(sd, (struct sockaddr *) &client_address, &addrlen) == -1) {
     printf("Could not retrieve socket name %s\n", strerror(errno));
     close(sd);
     exit(1);
   }
+
+  /* Get the client port */
+  clientport = ntohs(client_address.sin_port);
 
   /* succesful. return socket */
   printf("admin: connected to server on '%s' at '%hu' thru '%hu'\n",
