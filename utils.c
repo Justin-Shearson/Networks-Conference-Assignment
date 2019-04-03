@@ -1,3 +1,4 @@
+/* Justin Shearson (jrs330) */
 /*--------------------------------------------------------------------*/
 /* functions to connect clients and server */
 
@@ -11,53 +12,73 @@
 #include <arpa/inet.h> 
 #include <netdb.h>
 #include <time.h> 
+#include <stdlib.h>
+#include <unistd.h>
 #include <errno.h>
+
 
 #define MAXNAMELEN 256
 /*--------------------------------------------------------------------*/
 
 
 /*----------------------------------------------------------------*/
-int startserver()
-{
+
+int startserver() {
   int     sd;        /* socket */
-
-  char *  serverhost;  /* hostname */
+  char serverhost[MAXNAMELEN + 1];  /* hostname */
   ushort  serverport;  /* server port */
-  if(sd = socket(AF_INET, SOCK_STREAM, 0) < 0){
-    fprintf(stderr, "Error creating socket");
-    exit(1);
 
-  }
-  int server_fd = bind(sd, (struct));
+  /* Structs */
   struct sockaddr_in server_address;
-  server_address.sin_family = AF_INET;
-  server_address.sin_port = serverport;
-  server_address.sin_addr = INADDR_ANY;
-  /*
-    TODO:
-    create a TCP socket 
-  */
+  struct hostent *host_ent;
 
   /*
-    TODO:
-    bind the socket to some random port, chosen by the system 
+    Creates the socket for the server.
+    Returns an error stating that the socket could not be
+      created if sd returns -1.
   */
+  if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    fprintf(stderr, "Error creating socket");
+    close(sd);
+    return(-1);
+  }
+
+  /* Assigning attributes to server_address */
+  server_address.sin_family = AF_INET;
+  serverport = server_address.sin_port;
+  server_address.sin_addr.s_addr = INADDR_ANY;
+
+
+  /*
+    Binds the server socket to a random port
+    Returns an error if the socket could not be bound.
+  */
+  if(bind(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
+    printf("Could not bind socket with Error: %s\nSocket number: %d\n", strerror(errno), sd);
+    close(sd);
+    return(-1);
+  }
+  
 
   /* ready to receive connections */
   listen(sd, 5);
 
-  /*
-    TODO:
-    obtain the full local host name (serverhost)
-    use gethostname() and gethostbyname()
-  */
+  /* Gets the hostname and stores it in serverhost. */
+  if(gethostname(serverhost, MAXNAMELEN) == -1) {
+    printf("Could not get host name: %s\n", strerror(errno));
+    close(sd);
+    return(-1);
+  } else {
+    host_ent = gethostbyname(serverhost); //Store the server host information
+  }
 
-  /*
-    TODO:
-    get the port assigned to this server (serverport)
-    use getsockname()
-  */
+  /* Get the port assigned to the server */
+  int addrlen = sizeof(server_address);
+  if(getsockname(sd, (struct sockaddr *) &server_address, &addrlen) == -1) {
+    printf("Could not retrieve socket name: %s\n", strerror(errno));
+    close(sd);
+    return(-1);
+  }
 
   /* ready to accept requests */
   printf("admin: started server on '%s' at '%hu'\n",
@@ -70,28 +91,60 @@ int startserver()
 /*
   establishes connection with the server
 */
-int connecttoserver(char *serverhost, ushort serverport)
-{
+int connecttoserver(char *serverhost, ushort serverport) {
   int     sd;          /* socket */
-
   ushort  clientport;  /* port assigned to this client */
-
-  /*
-    TODO:
-    create a TCP socket 
-  */
-
-  /*
-    TODO:
-    connect to the server on 'serverhost' at 'serverport'
-    use gethostbyname() and connect()
-  */
   
-  /*
-    TODO:
-    get the port assigned to this client
-    use getsockname()
-  */
+  /* Create a TCP socket for the client to use */
+  if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    printf("Error creating socket: %s\n", strerror(errno));
+  }
+
+  /* Srtructures */
+  struct sockaddr_in server_address, client_address;
+
+  /* Struct used to hold information of the host that the client is connecting to */
+  struct hostent *host_ent;
+  
+  /* Gets the host name and stores it in the host_ent struct. */
+  host_ent = gethostbyname(serverhost);
+  if(host_ent == NULL) {
+    printf("Host name does not exist\n");
+    close(sd);
+    exit(1);
+  }
+
+  /* Assigning attributes for the server struct */
+  server_address.sin_family = AF_INET;
+  server_address.sin_addr.s_addr = INADDR_ANY;
+
+  /* Copy over the address from host_ent to s_addr in server address */
+  bcopy((char *) host_ent->h_addr, (char *) &server_address.sin_addr.s_addr, host_ent->h_length);
+  
+  /* Store the server port number */
+  server_address.sin_port = htons(serverport);
+
+  /* Assigning attributes for the client struct */
+  client_address.sin_family = AF_INET;
+  client_address.sin_addr.s_addr = INADDR_ANY;
+  clientport = client_address.sin_port;
+
+  /* Connect to the server */
+  if(connect(sd, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
+    printf("There was a problem connecting to the server: %s\n", strerror(errno));
+    return -1;
+  }
+
+  /* Get the port number that was assigned to the client */
+  int addrlen = sizeof(server_address);
+  if(getsockname(sd, (struct sockaddr *) &client_address, &addrlen) == -1) {
+    printf("Could not retrieve socket name %s\n", strerror(errno));
+    close(sd);
+    exit(1);
+  }
+
+  /* Get the client port */
+  clientport = ntohs(client_address.sin_port);
 
   /* succesful. return socket */
   printf("admin: connected to server on '%s' at '%hu' thru '%hu'\n",
@@ -102,8 +155,7 @@ int connecttoserver(char *serverhost, ushort serverport)
 
 
 /*----------------------------------------------------------------*/
-int readn(int sd, char *buf, int n)
-{
+int readn(int sd, char *buf, int n) {
   int     toberead;
   char *  ptr;
 
@@ -125,8 +177,7 @@ int readn(int sd, char *buf, int n)
   return(1);
 }
 
-char *recvmsg(int sd)
-{
+char *recvdata(int sd) {
   char *msg;
   long  len;
   
@@ -155,13 +206,13 @@ char *recvmsg(int sd)
   return(msg);
 }
 
-int sendmsg(int sd, char *msg)
-{
+int senddata(int sd, char *msg) {
   long len;
 
   /* write lent */
   len = (msg ? strlen(msg) + 1 : 0);
   len = htonl(len);
+  
   write(sd, (char *) &len, sizeof(len));
 
   /* write message data */
@@ -170,4 +221,5 @@ int sendmsg(int sd, char *msg)
     write(sd, msg, len);
   return(1);
 }
+
 /*----------------------------------------------------------------*/

@@ -1,3 +1,4 @@
+/* Justin Shearson (jrs330) */
 /*--------------------------------------------------------------------*/
 /* conference client */
 
@@ -12,19 +13,28 @@
 #include <time.h> 
 #include <errno.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #define MAXMSGLEN  1024
 
-extern char *  recvmsg(int sd);
-extern int     sendmsg(int sd, char *msg);
+extern char *  recvdata(int sd);
+extern int     senddata(int sd, char *msg);
 
 extern int     connecttoserver(char *servhost, ushort servport);
 /*--------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------*/
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   int  sock;
+  int err;  //Used to return errors
+
+  /* Structures */
+  fd_set client_fds;
+
+  /* Timeout Value */
+  struct timeval timeout;
+  timeout.tv_sec = 2;
 
   /* check usage */
   if (argc != 3) {
@@ -37,16 +47,22 @@ main(int argc, char *argv[])
   if (sock == -1)
     exit(1);
 
-  while (1) {
-    
-    /*
-      TODO: 
-      use select() to watch for user inputs and messages from the server
-    */
+  /* Zeroing the set and adding the client fd to the fd_set */
+  FD_ZERO(&client_fds);
+  FD_SET(sock, &client_fds);
+  FD_SET(0, &client_fds);
 
-    if (/* TODO: message from server */) {
+  while (1) {
+    /* Watch for file descriptors from the server as well as other clients. */
+    err = select(sock + 1, &client_fds, NULL, NULL, &timeout);
+    if(err == -1){
+      printf("Error selecting file descriptor: %s\n", strerror(errno));
+    }
+    
+    /* If there is a client ready to be served */
+    if (FD_ISSET(sock, &client_fds)) {
       char *msg;
-      msg = recvmsg(sock);
+      msg = recvdata(sock);
       if (!msg) {
 	/* server died, exit */
 	fprintf(stderr, "error: server died\n");
@@ -57,14 +73,16 @@ main(int argc, char *argv[])
       printf(">>> %s", msg);
       free(msg);
     }
-
-    if (/* TODO: input from keyboard */) {
+    
+    /* If there is a message to be sent to the server */
+    if ((FD_ISSET(0, &client_fds))) {
       char      msg[MAXMSGLEN];
 
       if (!fgets(msg, MAXMSGLEN, stdin))
 	exit(0);
-      sendmsg(sock, msg);
+      senddata(sock, msg);
     }
   }
+  return 1;
 }
 /*--------------------------------------------------------------------*/
